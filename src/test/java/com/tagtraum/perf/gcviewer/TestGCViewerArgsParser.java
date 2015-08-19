@@ -86,4 +86,17 @@ public class TestGCViewerArgsParser {
             assertThat("exception message", e.getMessage(), startsWith("Illegal type 'ILLEGAL'"));
         }
     }
+
+    @Test
+    public void dashArguments() throws Exception {
+        String[] args = {"-a", "all",  "some_gc.log", "export_to.csv", "the_chart.png", "-t", "CSV"};
+        GCViewerArgsParser gcViewerArgsParser = new GCViewerArgsParser();
+        gcViewerArgsParser.parseArguments(args);
+
+        assertEquals(gcViewerArgsParser.getArgumentCount(), 3);
+        assertEquals(gcViewerArgsParser.getGcfile(), "some_gc.log");
+        assertEquals(gcViewerArgsParser.getSummaryFilePath(), "export_to.csv");
+        assertEquals(gcViewerArgsParser.getChartFilePath(), "the_chart.png");
+        assertEquals(gcViewerArgsParser.getType(), DataWriterType.CSV);
+    }
 }

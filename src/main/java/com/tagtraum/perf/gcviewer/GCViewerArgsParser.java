@@ -2,7 +2,11 @@ package com.tagtraum.perf.gcviewer;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import com.tagtraum.perf.gcviewer.exp.DataWriterType;
 
@@ -50,18 +54,36 @@ public class GCViewerArgsParser {
      */
     public void parseArguments(String[] args) throws GCViewerArgsParserException {
         List<String> argsList = new ArrayList<String>(Arrays.asList(args));
-        int typeIdx = argsList.indexOf("-t");
-
-        // If there is a -t and there is a string after, set the type
-        if (typeIdx != -1 && argsList.size() > (typeIdx + 1)) {
-            type = parseType(argsList.get(typeIdx + 1));
-            // Chomp these two from the array to prevent any order issues
-            argsList.remove(typeIdx);
-            argsList.remove(typeIdx);
-        } 
-        else if (typeIdx != -1) {
-            // No specific type set, just keep the default
-            argsList.remove(typeIdx);
+        
+        Map<String,String> argsMap= new HashMap<>();
+        // first find all of the args that are -<flag> <value>, and take those.
+        // if none of those are presnet, then fall back and parse whatever is left
+        ListIterator<String> itr = argsList.listIterator();
+        while(itr.hasNext()) {
+            String arg = itr.next();
+            if (arg.startsWith("-")) {
+                itr.remove();
+                // we have an arg, so eat it and the next.
+                String value = null;
+                if (itr.hasNext()) {
+                    value = itr.next();
+                    if (value.startsWith("-")) {
+                        itr.previous();
+                    } else {
+                        itr.remove();
+                    }
+                }
+                argsMap.put(arg, value);
+                
+            }
+        }
+        
+        for (Entry<String, String> e: argsMap.entrySet()) {
+            switch (e.getKey()) {
+            case "-t":
+                type = parseType(e.getValue());
+                break;
+            }
         }
 
         argumentCount = argsList.size();
@@ -72,7 +94,7 @@ public class GCViewerArgsParser {
 
     private DataWriterType parseType(String type) throws GCViewerArgsParserException {
         try {
-            return DataWriterType.valueOf(type);
+            return DataWriterType.valueOf(type.toUpperCase());
         }
         catch (IllegalArgumentException e) {
             throw new GCViewerArgsParserException(type);

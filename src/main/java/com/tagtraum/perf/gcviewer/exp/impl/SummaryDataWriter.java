@@ -39,6 +39,7 @@ public class SummaryDataWriter extends AbstractDataWriter {
     private TimeFormat totalTimeFormatter;
     private MemoryFormat freedMemoryPerMinFormatter;
     private MemoryFormat sigmaMemoryFormatter;
+    private NumberFormat countFormatter;
 
     public SummaryDataWriter(OutputStream out) {
         //use the default csv formatter
@@ -91,6 +92,10 @@ public class SummaryDataWriter extends AbstractDataWriter {
         percentFormatter = NumberFormat.getInstance();
         percentFormatter.setMaximumFractionDigits(1);
         percentFormatter.setMinimumFractionDigits(1);
+        
+        countFormatter = NumberFormat.getInstance();
+        countFormatter.setMaximumFractionDigits(0);
+        countFormatter.setMinimumFractionDigits(0);
     }
 
     private void exportValue(PrintWriter writer, String tag, boolean bValue) {
@@ -223,6 +228,8 @@ public class SummaryDataWriter extends AbstractDataWriter {
         exportValue(out, "fullGCPausePc", percentFormatter.format(model.getFullGCPause().getSum()*100.0/model.getPause().getSum()), "%");
         exportValue(out, "gcPause", gcTimeFormatter.format(model.getGCPause().getSum()), "s");
         exportValue(out, "gcPausePc", percentFormatter.format(model.getGCPause().getSum()*100.0/model.getPause().getSum()), "%");
+        exportValue(out, "fullGCPauseCount", countFormatter.format(model.getFullGCPause().getN()), "s");
+        exportValue(out, "GCPauseCount", countFormatter.format(model.getGCPause().getN()), "s");
     }
 
     private boolean isSignificant(final double average, final double standardDeviation) {

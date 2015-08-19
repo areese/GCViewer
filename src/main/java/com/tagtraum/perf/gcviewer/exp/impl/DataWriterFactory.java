@@ -3,6 +3,7 @@ package com.tagtraum.perf.gcviewer.exp.impl;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Map;
 
 import com.tagtraum.perf.gcviewer.exp.DataWriter;
@@ -45,8 +46,17 @@ public class DataWriterFactory {
      * @return instance of DataWriter accorting to <code>type</code> parameter
      * @throws IOException unknown DataWriter or problem creating file
      */
+    @SuppressWarnings("resource")
     public static DataWriter getDataWriter(File file, DataWriterType type, Map<String, Object> configuration) throws IOException {
-        FileOutputStream outputStream = new FileOutputStream(file);
+        OutputStream outputStream;
+        if ("STDERR".equals(file.getName())) {
+            outputStream=System.err;
+        } else if ("-".equals(file.getName()) || "STDOUT".equals(file.getName())) {
+            outputStream=System.out;
+        } else {
+            outputStream = new FileOutputStream(file);
+        }
+
         switch (type) {
             case PLAIN   : return new PlainDataWriter(outputStream); 
             case CSV     : return new CSVDataWriter(outputStream);
